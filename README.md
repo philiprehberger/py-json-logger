@@ -83,6 +83,14 @@ logger.setLevel(logging.INFO)
 
 Any `extra={}` kwargs passed to the log call are merged into the top-level JSON object. Static `extra_fields` from the formatter are also merged.
 
+
+## Development
+
+```bash
+pip install -e .
+python -m pytest tests/ -v
+```
+
 ## License
 
 MIT
