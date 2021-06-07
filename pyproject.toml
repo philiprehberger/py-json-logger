@@ -24,9 +24,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/philiprehberger/py-json-logger"
+Homepage = "https://github.com/philiprehberger/py-json-logger#readme"
 Repository = "https://github.com/philiprehberger/py-json-logger"
 Issues = "https://github.com/philiprehberger/py-json-logger/issues"
+Changelog = "https://github.com/philiprehberger/py-json-logger/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/philiprehberger_json_logger"]
