@@ -1,5 +1,9 @@
 # philiprehberger-json-logger
 
+[![Tests](https://github.com/philiprehberger/py-json-logger/actions/workflows/publish.yml/badge.svg)](https://github.com/philiprehberger/py-json-logger/actions/workflows/publish.yml)
+[![PyPI version](https://img.shields.io/pypi/v/philiprehberger-json-logger.svg)](https://pypi.org/project/philiprehberger-json-logger/)
+[![License](https://img.shields.io/github/license/philiprehberger/py-json-logger)](LICENSE)
+
 Drop-in structured JSON logging for Python using the stdlib `logging` module.
 
 ## Install
