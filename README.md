@@ -6,7 +6,7 @@
 
 Drop-in structured JSON logging for Python using the stdlib `logging` module.
 
-## Install
+## Installation
 
 ```bash
 pip install philiprehberger-json-logger
