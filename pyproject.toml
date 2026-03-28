@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "philiprehberger-json-logger"
-version = "0.1.5"
+version = "0.2.0"
 description = "Drop-in structured JSON logging for Python using the stdlib logging module"
 readme = "README.md"
 license = "MIT"

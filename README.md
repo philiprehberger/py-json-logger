@@ -2,7 +2,11 @@
 
 [![Tests](https://github.com/philiprehberger/py-json-logger/actions/workflows/publish.yml/badge.svg)](https://github.com/philiprehberger/py-json-logger/actions/workflows/publish.yml)
 [![PyPI version](https://img.shields.io/pypi/v/philiprehberger-json-logger.svg)](https://pypi.org/project/philiprehberger-json-logger/)
+[![GitHub release](https://img.shields.io/github/v/release/philiprehberger/py-json-logger)](https://github.com/philiprehberger/py-json-logger/releases)
+[![Last updated](https://img.shields.io/github/last-commit/philiprehberger/py-json-logger)](https://github.com/philiprehberger/py-json-logger/commits/main)
 [![License](https://img.shields.io/github/license/philiprehberger/py-json-logger)](LICENSE)
+[![Bug Reports](https://img.shields.io/github/issues/philiprehberger/py-json-logger/bug)](https://github.com/philiprehberger/py-json-logger/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+[![Feature Requests](https://img.shields.io/github/issues/philiprehberger/py-json-logger/enhancement)](https://github.com/philiprehberger/py-json-logger/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
 [![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 Drop-in structured JSON logging for Python using the stdlib `logging` module.
@@ -49,6 +53,37 @@ setup(level="INFO", extra_fields={"service": "api", "env": "production"})
 
 Every log entry will include `"service": "api"` and `"env": "production"`.
 
+### Field redaction
+
+```python
+from philiprehberger_json_logger import setup
+
+setup(level="INFO", redact_fields={"password", "token", "secret"})
+
+import logging
+logging.info("Login", extra={"user": "alice", "password": "s3cret"})
+# password field will appear as "***"
+```
+
+Redaction works recursively on nested dicts.
+
+### Scoped context
+
+```python
+import logging
+from philiprehberger_json_logger import setup, log_context
+
+setup(level="INFO")
+
+with log_context(request_id="abc-123", user="alice"):
+    logging.info("Processing request")
+    # log entry includes request_id and user fields
+
+    with log_context(step="validation"):
+        logging.info("Validating input")
+        # log entry includes request_id, user, and step fields
+```
+
 ### Custom handler with JsonFormatter
 
 ```python
@@ -56,7 +91,7 @@ import logging
 from philiprehberger_json_logger import JsonFormatter
 
 handler = logging.FileHandler("app.log")
-handler.setFormatter(JsonFormatter(extra_fields={"service": "worker"}))
+handler.setFormatter(JsonFormatter(extra_fields={"service": "worker"}, redact_fields={"token"}))
 
 logger = logging.getLogger("worker")
 logger.addHandler(handler)
@@ -67,8 +102,9 @@ logger.setLevel(logging.INFO)
 
 | Name | Description |
 |---|---|
-| `JsonFormatter(*, extra_fields=None)` | Logging formatter that outputs JSON lines. `extra_fields` is a dict of static fields merged into every entry. |
-| `setup(level="INFO", *, extra_fields=None, logger=None)` | Configure a logger with JSON output. Defaults to the root logger. Clears existing handlers. |
+| `JsonFormatter(*, extra_fields=None, redact_fields=None)` | Logging formatter that outputs JSON lines. `extra_fields` is a dict of static fields merged into every entry. `redact_fields` is a set of field names replaced with `"***"`. |
+| `setup(level="INFO", *, extra_fields=None, redact_fields=None, logger=None)` | Configure a logger with JSON output. Defaults to the root logger. Clears existing handlers. |
+| `log_context(**kwargs)` | Context manager that injects fields into all log entries within the block. Supports nesting. |
 
 ### JSON output fields
 
@@ -82,8 +118,7 @@ logger.setLevel(logging.INFO)
 | `line` | Source line number |
 | `exception` | Full traceback string (only present when logging an exception) |
 
-Any `extra={}` kwargs passed to the log call are merged into the top-level JSON object. Static `extra_fields` from the formatter are also merged.
-
+Any `extra={}` kwargs passed to the log call are merged into the top-level JSON object. Static `extra_fields` from the formatter and active `log_context()` fields are also merged.
 
 ## Development
 
@@ -92,6 +127,13 @@ pip install -e .
 python -m pytest tests/ -v
 ```
 
+## Support
+
+If you find this package useful, consider starring the repository.
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Philip%20Rehberger-blue?logo=linkedin)](https://www.linkedin.com/in/philiprehberger/)
+[![More packages](https://img.shields.io/badge/More%20packages-philiprehberger-orange)](https://github.com/philiprehberger?tab=repositories)
+
 ## License
 
-MIT
+[MIT](LICENSE)

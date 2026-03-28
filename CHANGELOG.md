@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 (2026-03-27)
+
+- Add field redaction via `redact_fields` parameter on `JsonFormatter` and `setup()`
+- Add `log_context()` context manager for scoped structured fields using `contextvars`
+- Nested dict values are recursively redacted when matching `redact_fields`
+- Nested `log_context()` blocks merge and inner values override outer ones
+
 ## 0.1.5 (2026-03-22)
 
 - Add pytest and mypy configuration to pyproject.toml
