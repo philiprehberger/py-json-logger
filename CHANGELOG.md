@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0 (2026-05-30)
+
+- Add `indent` parameter to `JsonFormatter` for pretty-printed JSON output
+- Add `clear_context()` for explicit reset of all `log_context()` bindings
+
 ## 0.2.1 (2026-03-31)
 
 - Standardize README to 3-badge format with emoji Support section

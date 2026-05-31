@@ -11,7 +11,7 @@ from collections.abc import Generator
 from datetime import datetime, timezone
 from typing import Any
 
-__all__ = ["JsonFormatter", "log_context", "setup"]
+__all__ = ["JsonFormatter", "clear_context", "log_context", "setup"]
 
 _BUILTIN_ATTRS = frozenset(logging.LogRecord("", 0, "", 0, None, None, None).__dict__)
 
@@ -41,6 +41,15 @@ def log_context(**kwargs: Any) -> Generator[None, None, None]:
         _context_var.reset(token)
 
 
+def clear_context() -> None:
+    """Clear all currently-bound log_context() fields.
+
+    Useful when the with-block scoping isn't a fit (e.g. in test
+    teardown or framework reset hooks).
+    """
+    _context_var.set({})
+
+
 def _redact(data: dict[str, Any], fields: set[str]) -> dict[str, Any]:
     """Recursively redact values for keys matching *fields*."""
     redacted: dict[str, Any] = {}
@@ -62,10 +71,12 @@ class JsonFormatter(logging.Formatter):
         *,
         extra_fields: dict[str, Any] | None = None,
         redact_fields: set[str] | None = None,
+        indent: int | None = None,
     ) -> None:
         super().__init__()
         self._extra_fields = extra_fields or {}
         self._redact_fields = redact_fields or set()
+        self._indent = indent
 
     def format(self, record: logging.LogRecord) -> str:
         entry: dict[str, Any] = {
@@ -96,7 +107,7 @@ class JsonFormatter(logging.Formatter):
         if self._redact_fields:
             entry = _redact(entry, self._redact_fields)
 
-        return json.dumps(entry, default=str)
+        return json.dumps(entry, default=str, indent=self._indent)
 
 
 def setup(

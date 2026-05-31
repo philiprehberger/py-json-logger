@@ -4,7 +4,7 @@ import io
 import json
 import logging
 
-from philiprehberger_json_logger import JsonFormatter, setup
+from philiprehberger_json_logger import JsonFormatter, clear_context, log_context, setup
 
 
 def _make_logger(
@@ -194,3 +194,52 @@ def test_json_formatter_standalone_with_custom_handler() -> None:
     assert entry["message"] == "standalone test"
     assert entry["component"] == "worker"
     logger.handlers.clear()
+
+
+def test_default_output_is_single_line() -> None:
+    logger, buf = _make_logger("test.single_line")
+    logger.info("compact")
+    buf.seek(0)
+    line = buf.readline()
+    # Strip the trailing newline added by StreamHandler, then check no embedded newlines
+    assert "\n" not in line.rstrip("\n")
+    parsed = json.loads(line)
+    assert parsed["message"] == "compact"
+    logger.handlers.clear()
+
+
+def test_indent_produces_multiline_json() -> None:
+    buf = io.StringIO()
+    handler = logging.StreamHandler(buf)
+    handler.setFormatter(JsonFormatter(indent=2))
+
+    logger = logging.getLogger("test.indent")
+    logger.handlers.clear()
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+
+    logger.info("pretty")
+    buf.seek(0)
+    formatted = buf.read()
+    assert "\n  " in formatted
+    # The pretty-printed output should still be valid JSON once the trailing
+    # newline from StreamHandler is stripped.
+    parsed = json.loads(formatted.rstrip("\n"))
+    assert parsed["message"] == "pretty"
+    logger.handlers.clear()
+
+
+def test_clear_context_removes_bound_fields() -> None:
+    logger, buf = _make_logger("test.clear_context")
+    with log_context(user="alice"):
+        clear_context()
+        logger.info("after clear")
+    entry = _parse(buf)
+    assert "user" not in entry
+    logger.handlers.clear()
+
+
+def test_clear_context_on_empty_is_noop() -> None:
+    # Should not raise when no context is bound.
+    clear_context()
+    clear_context()

@@ -79,6 +79,24 @@ with log_context(request_id="abc-123", user="alice"):
         # log entry includes request_id, user, and step fields
 ```
 
+### Clearing context
+
+```python
+import logging
+from philiprehberger_json_logger import setup, log_context, clear_context
+
+setup(level="INFO")
+
+with log_context(user="alice"):
+    logging.info("First")  # includes user
+
+    clear_context()
+    logging.info("Second")  # no user field
+```
+
+Useful in test teardown or framework reset hooks where the `with`-block
+scoping doesn't fit.
+
 ### Custom handler with JsonFormatter
 
 ```python
@@ -93,13 +111,36 @@ logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 ```
 
+### Pretty-printed output
+
+```python
+import logging
+from philiprehberger_json_logger import JsonFormatter
+
+handler = logging.StreamHandler()
+handler.setFormatter(JsonFormatter(indent=2))
+
+logger = logging.getLogger("dev")
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+logger.info("Pretty")
+# {
+#   "timestamp": "2026-05-30T12:00:00+00:00",
+#   "level": "INFO",
+#   "message": "Pretty",
+#   ...
+# }
+```
+
 ## API
 
 | Name | Description |
 |---|---|
-| `JsonFormatter(*, extra_fields=None, redact_fields=None)` | Logging formatter that outputs JSON lines. `extra_fields` is a dict of static fields merged into every entry. `redact_fields` is a set of field names replaced with `"***"`. |
+| `JsonFormatter(*, extra_fields=None, redact_fields=None, indent=None)` | Logging formatter that outputs JSON lines. `extra_fields` is a dict of static fields merged into every entry. `redact_fields` is a set of field names replaced with `"***"`. `indent` (int or `None`) is forwarded to `json.dumps` for pretty-printed output; `None` produces compact single-line JSON. |
 | `setup(level="INFO", *, extra_fields=None, redact_fields=None, logger=None)` | Configure a logger with JSON output. Defaults to the root logger. Clears existing handlers. |
 | `log_context(**kwargs)` | Context manager that injects fields into all log entries within the block. Supports nesting. |
+| `clear_context()` | Clear all currently-bound `log_context()` fields. Useful in test teardown or framework reset hooks. No-op if nothing is bound. |
 
 ### JSON output fields
 
